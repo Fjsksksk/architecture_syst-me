@@ -7,7 +7,7 @@
 
 void planifier_taches(const char *commande, int delai, int iterations)
 {
-    // Vérification du délai
+    // vérification du délai
     if (delai <= 0)
     {
         fprintf(stderr, "Erreur : Le délai doit être supérieur à zéro.\n");
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     // Vérification du nombre d'arguments
     if (argc != 4)
     {
-        fprintf(stderr, "Usage: %s <\"commande\"> <delai> <iterations>\n", argv[0]);
+        fprintf(stderr, "Fonctionnement: %s <\"commande\"> <delai> <iterations>\n", argv[0]);
         return 1;
     }
 
@@ -58,6 +58,12 @@ int main(int argc, char *argv[])
     if (delai <= 0)
     {
         fprintf(stderr, "Erreur : Le délai doit être supérieur à zéro.\n");
+        return 1;
+    }
+    // Vérification qu'il y ai minimum une itération
+    if (delai <= 0)
+    {
+        fprintf(stderr, "Erreur : Le nombre d'itérations doit être supérieur à 1.\n");
         return 1;
     }
 
