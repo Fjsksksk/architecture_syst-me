@@ -3,39 +3,46 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
-#include <string.h> // Pour utiliser strtok
+#include <string.h>
 
 void planifier_taches(const char *commande, int delai, int iterations)
 {
+    // Vérification du délai
     if (delai <= 0)
     {
         fprintf(stderr, "Erreur : Le délai doit être supérieur à zéro.\n");
         return;
     }
 
-    time_t start_time;
-    time(&start_time); // Enregistrement du temps de départ
-
+    // Boucle sur le nombre d'itérations
     for (int i = 0; i < iterations; i++)
     {
         // Exécution de la commande
         printf("Exécution de la commande : %s\n", commande);
         system(commande);
 
-        // Calcul du temps écoulé depuis le début de l'exécution
-        time_t current_time;
-        time(&current_time);
-        double elapsed_time = difftime(current_time, start_time);
+        // Calcul du temps d'attente avant la prochaine exécution
+        if (i != iterations - 1) // Si ce n'est pas la dernière itération
+        {
+            // Enregistrement du temps de départ
+            time_t start_time;
+            time(&start_time);
 
-        // Calcul du temps d'attente jusqu'à la prochaine exécution
-        int remaining_time = delai - ((int)elapsed_time % delai);
-        printf("Attente jusqu'à la prochaine exécution : %d secondes\n", remaining_time);
-        sleep(remaining_time);
+            // Calcul du temps d'attente
+            int remaining_time = delai - (time(NULL) - start_time) % delai;
+            printf("Attente jusqu'à la prochaine exécution : %d secondes\n", remaining_time);
+            sleep(remaining_time);
+        }
+        else
+        {
+            printf("Fin des itérations.\n");
+        }
     }
 }
 
 int main(int argc, char *argv[])
 {
+    // Vérification du nombre d'arguments
     if (argc != 4)
     {
         fprintf(stderr, "Usage: %s <\"commande\"> <delai> <iterations>\n", argv[0]);
