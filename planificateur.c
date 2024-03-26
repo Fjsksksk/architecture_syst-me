@@ -1,69 +1,81 @@
+// test :./planificateur "ls" 5 3 ou ./planificateur "echo 'bjr'; sleep 10; echo 'bye';" 5 2
+
 #include "planificateur.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <unistd.h>
+#include <errno.h>
 #include <string.h>
+#include <sys/wait.h>
+
+void executer_commande(const char *commande)
+{
+    // Lancement de la commande via le shell
+    execl("/bin/sh", "sh", "-c", commande, NULL);
+
+    // Si execl échoue, affiche une erreur
+    perror("Erreur lors de l'exécution de la commande");
+    exit(EXIT_FAILURE);
+}
 
 void planifier_taches(const char *commande, int delai, int iterations)
 {
-    // vérification du délai
-    if (delai <= 0)
-    {
-        fprintf(stderr, "Erreur : Le délai doit être supérieur à zéro.\n");
-        return;
-    }
-
     // Boucle sur le nombre d'itérations
     for (int i = 0; i < iterations; i++)
     {
-        // Exécution de la commande
-        printf("Exécution de la commande : %s\n", commande);
-        system(commande);
+        // Lancement d'un processus fils pour exécuter la commande
+        pid_t pid = fork();
 
-        // Calcul du temps d'attente avant la prochaine exécution
-        if (i != iterations - 1) // Si ce n'est pas la dernière itération
+        if (pid == -1)
         {
-            // Enregistrement du temps de départ
-            time_t start_time;
-            time(&start_time);
-
-            // Calcul du temps d'attente
-            int remaining_time = delai - (time(NULL) - start_time) % delai;
-            printf("Attente jusqu'à la prochaine exécution : %d secondes\n", remaining_time);
-            sleep(remaining_time);
+            // Erreur lors de la création du processus fils
+            perror("Erreur lors de la création du processus fils");
+            exit(EXIT_FAILURE);
+        }
+        else if (pid == 0)
+        {
+            // Processus fils : exécute la commande
+            executer_commande(commande);
+            exit(EXIT_SUCCESS); // Quitte le processus fils après l'exécution de la commande
         }
         else
         {
-            printf("Fin des itérations.\n");
+            // Processus parent : attend le délai entre chaque itération
+            sleep(delai);
         }
+    }
+
+    // Attend la fin de toutes les itérations avant de terminer le processus parent
+    for (int i = 0; i < iterations; i++)
+    {
+        wait(NULL);
     }
 }
 
 int main(int argc, char *argv[])
 {
-    // Vérification du nombre d'arguments
+    // Vérifie le nombre d'arguments
     if (argc != 4)
     {
-        fprintf(stderr, "Fonctionnement: %s <\"commande\"> <delai> <iterations>\n", argv[0]);
+        fprintf(stderr, "Utilisation: %s <commande> <delai> <iterations>\n", argv[0]);
         return 1;
     }
 
-    // Récupération des arguments de la ligne de commande
-    const char *commande = strtok(argv[1], "\"");
+    // Récupère les arguments de la ligne de commande
+    const char *commande = argv[1];
     int delai = atoi(argv[2]);
     int iterations = atoi(argv[3]);
 
-    // Vérification que le délai est supérieur à zéro
+    // Vérifie que le délai est supérieur à zéro
     if (delai <= 0)
     {
         fprintf(stderr, "Erreur : Le délai doit être supérieur à zéro.\n");
         return 1;
     }
-    // Vérification qu'il y ai minimum une itération
-    if (delai <= 0)
+    // Vérifie qu'il y a au moins une itération
+    if (iterations <= 0)
     {
-        fprintf(stderr, "Erreur : Le nombre d'itérations doit être supérieur à 1.\n");
+        fprintf(stderr, "Erreur : Le nombre d'itérations doit être supérieur à 0.\n");
         return 1;
     }
 
