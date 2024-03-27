@@ -40,8 +40,10 @@ void planifier_taches(const char *commande, int delai, int iterations)
         }
         else
         {
-            // Processus parent : attend le délai entre chaque itération
-            sleep(delai);
+            // Attendre tant que nous ne sommes pas à la fin
+            if (i < iterations - 1)
+                // Processus parent : attend le délai entre chaque itération
+                sleep(delai);
         }
     }
 
