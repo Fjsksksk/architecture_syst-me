@@ -1,4 +1,4 @@
-// test :./planificateur "ls" 5 3 ou ./planificateur "echo 'bjr'; sleep 10; echo 'bye';" 5 2
+// test :./planificateur 2 5 "ls" ou ./planificateur 2 5 "echo 'bjr'; sleep 10; echo 'bye';"
 
 #include "planificateur.h"
 #include <stdio.h>
@@ -40,9 +40,8 @@ void planifier_taches(const char *commande, int delai, int iterations)
         }
         else
         {
-            // Attendre tant que nous ne sommes pas à la fin
-            if (i < iterations - 1)
-                // Processus parent : attend le délai entre chaque itération
+            // Processus parent : attend le délai entre chaque itération
+            if (i < iterations - 1) // Attend seulement si ce n'est pas la dernière itération
                 sleep(delai);
         }
     }
@@ -59,14 +58,14 @@ int main(int argc, char *argv[])
     // Vérifie le nombre d'arguments
     if (argc != 4)
     {
-        fprintf(stderr, "Utilisation: %s <commande> <delai> <iterations>\n", argv[0]);
+        fprintf(stderr, "Utilisation du planificateur: %s <iterations> <delai> <\"commande\">\n", argv[0]);
         return 1;
     }
 
     // Récupère les arguments de la ligne de commande
-    const char *commande = argv[1];
+    int iterations = atoi(argv[1]);
     int delai = atoi(argv[2]);
-    int iterations = atoi(argv[3]);
+    const char *commande = argv[3];
 
     // Vérifie que le délai est supérieur à zéro
     if (delai <= 0)
