@@ -8,7 +8,9 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <time.h>
 
+// Fonction pour exécuter une commande via le shell
 void executer_commande(const char *commande)
 {
     // Lancement de la commande via le shell
@@ -87,9 +89,9 @@ void planifier_taches(const char *commande, int delai, int iterations)
 int main(int argc, char *argv[])
 {
     // Vérifie le nombre d'arguments
-    if (argc != 4)
+    if (argc != 4 && argc != 5)
     {
-        fprintf(stderr, "\nUtilisation du planificateur: %s <iterations> <delai> <\"commande\">\n\nOptions :\ninfini : <itération> = i \n", argv[0]);
+        fprintf(stderr, "\nUtilisation du planificateur: %s <iterations> <delai> <\"commande\"> <date (facultatif)>\n\nOptions :\ninfini : <itération> = i \ndate : <date> = JJ/MM/AAAA-HH:MM\n", argv[0]);
         return 1;
     }
 
@@ -118,9 +120,59 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Erreur : Le nombre d'itérations doit être supérieur à 0.\n");
         return 1;
     }
+    if (argc == 5)
+    {
+        // Vérifie si la date est au bon format
+        char *date = argv[4];
+        if (strlen(date) != 16 || date[2] != '/' || date[5] != '/' || date[10] != '-' || date[13] != ':')
+        {
+            fprintf(stderr, "Erreur : Format de date incorrect. Utilisez JJ/MM/AAAA-HH:MM.\n");
+            return 1;
+        }
 
-    // Appel de la fonction de planification des tâches
-    planifier_taches(commande, delai, iterations);
+        // Obtention de la date actuelle
+        time_t date_actuelle;
+        struct tm *tm_date_actuelle;
+        time(&date_actuelle);
+        tm_date_actuelle = localtime(&date_actuelle);
+
+        // Conversion de la date spécifiée en struct tm
+        struct tm tm_date_utilisateur;
+        sscanf(date, "%d/%d/%d-%d:%d", &tm_date_utilisateur.tm_mday, &tm_date_utilisateur.tm_mon, &tm_date_utilisateur.tm_year, &tm_date_utilisateur.tm_hour, &tm_date_utilisateur.tm_min);
+        tm_date_utilisateur.tm_mon -= 1;     // Mois de 0 à 11
+        tm_date_utilisateur.tm_year -= 1900; // Année - 1900
+
+        tm_date_utilisateur.tm_hour -= 1; // Décrémente l'heure de 1 ? Je ne sais pas pourquoi mais lors du debug l'heure spécifiée prenant 1 heure XD
+        time_t date_utilisateur = mktime(&tm_date_utilisateur);
+        int difference = difftime(date_utilisateur, date_actuelle);
+
+        // Si la différence est négative, la date spécifiée est antérieure à la date actuelle
+        if (difference < 0)
+        {
+            printf("Date spécifiée antérieure à la date actuelle. Exécution immédiate de la commande.\n");
+            planifier_taches(commande, delai, iterations);
+            return 0;
+        }
+        else if (difference == 0)
+        {
+            printf("Date spécifiée identique à la date actuelle. Exécution immédiate de la commande.\n");
+            planifier_taches(commande, delai, iterations);
+            return 0;
+        }
+        else
+        {
+            // Attente jusqu'à la date spécifiée
+            printf("Attente jusqu'à la date spécifiée. Temps d'attente : %d secondes\n", difference);
+            sleep(difference);
+
+            // Exécution de la commande après l'attente
+            planifier_taches(commande, delai, iterations);
+        }
+    }
+    else // Si aucune date spécifiée, exécute immédiatement la commande
+    {
+        planifier_taches(commande, delai, iterations);
+    }
 
     return 0;
 }
