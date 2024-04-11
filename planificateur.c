@@ -1,4 +1,9 @@
-// test :./planificateur 2 5 "ls" ou ./planificateur 2 5 "echo 'bjr'; sleep 10; echo 'bye';" ou ./planificateur i 5 "ls" ou ./planificateur 2 5 "ls" 11/04/2024-09:00
+// test :
+// normal = ./planificateur 2 5 "ls"
+// chevauchement de 2 commandes = ./planificateur 2 5 "echo 'bjr'; sleep 10; echo 'bye';"
+// infini =  ./planificateur i 5 "ls"
+// date = ./planificateur 2 5 "ls" 11/04/2024-09:00
+// date + infini + chevauchement = ./planificateur i 3 "echo 'bjr'; sleep 10; echo 'bye';" 11/04/2024-09:00
 
 #include "planificateur.h"
 #include <stdio.h>
@@ -21,6 +26,7 @@ void executer_commande(const char *commande)
     exit(EXIT_FAILURE);
 }
 
+// Fonction pour planifier les tâches en fonction du délai et du nombre d'itérations
 void planifier_taches(const char *commande, int delai, int iterations)
 {
     // Si le nombre d'itérations est infini, défini iterations sur -1
@@ -86,6 +92,7 @@ void planifier_taches(const char *commande, int delai, int iterations)
     }
 }
 
+// Fonction pour récuperer les informations donner par l'uttlisateur et lancer le planificateur en fonction d'elle.
 int main(int argc, char *argv[])
 {
     // Vérifie le nombre d'arguments
@@ -99,7 +106,7 @@ int main(int argc, char *argv[])
     int iterations;
     if (strcmp(argv[1], "i") == 0)
     {
-        iterations = -1; // Infinité
+        iterations = -1; // Infini
     }
     else
     {
@@ -114,7 +121,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Erreur : Le délai doit être supérieur à zéro.\n");
         return 1;
     }
-    // Vérifie qu'il y a au moins une itération
+    // Vérifie qu'il y a au moins une itération ou different d'infini
     if (iterations != -1 && iterations <= 0)
     {
         fprintf(stderr, "Erreur : Le nombre d'itérations doit être supérieur à 0.\n");
@@ -136,13 +143,13 @@ int main(int argc, char *argv[])
         time(&date_actuelle);
         tm_date_actuelle = localtime(&date_actuelle);
 
-        // Conversion de la date spécifiée en struct tm
+        // Conversion de la date uttlisateur en struct tm
         struct tm tm_date_utilisateur;
         sscanf(date, "%d/%d/%d-%d:%d", &tm_date_utilisateur.tm_mday, &tm_date_utilisateur.tm_mon, &tm_date_utilisateur.tm_year, &tm_date_utilisateur.tm_hour, &tm_date_utilisateur.tm_min);
         tm_date_utilisateur.tm_mon -= 1;     // Mois de 0 à 11
         tm_date_utilisateur.tm_year -= 1900; // Année - 1900
 
-        tm_date_utilisateur.tm_hour -= 1; // Décrémente l'heure de 1 ? Je ne sais pas pourquoi mais lors du debug l'heure spécifiée prenant 1 heure XD
+        tm_date_utilisateur.tm_hour -= 1; // Décrémente l'heure de 1, Je ne sais pas pourquoi mais lors du debug l'heure spécifiée prenais 1 heure XD
         time_t date_utilisateur = mktime(&tm_date_utilisateur);
         int difference = difftime(date_utilisateur, date_actuelle);
 
