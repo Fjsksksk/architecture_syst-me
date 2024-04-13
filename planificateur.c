@@ -17,7 +17,8 @@
 
 // Fonction pour exécuter une commande via le shell
 void executer_commande(const char *commande)
-{
+{   
+    printf("commande exécuté\n");
     // Lancement de la commande via le shell
     execl("/bin/sh", "sh", "-c", commande, NULL);
 
@@ -62,9 +63,9 @@ void planifier_taches(const char *commande, int delai, int iterations)
         // Boucle sur le nombre d'itérations
         for (int i = 0; i < iterations; i++)
         {
+            
             // Lancement d'un processus fils pour exécuter la commande
             pid_t pid = fork();
-
             if (pid == -1)
             {
                 // Erreur lors de la création du processus fils
@@ -83,13 +84,30 @@ void planifier_taches(const char *commande, int delai, int iterations)
                 if (i < iterations - 1) // Attend seulement si ce n'est pas la dernière itération
                     sleep(delai);
             }
+            
         }
+        
     }
     // Attend la fin de toutes les itérations avant de terminer le processus parent
-    for (int i = 0; i < iterations; i++)
-    {
-        wait(NULL);
-    }
+    
+    
+}
+
+// Fonction pour créer un processus fils et planifier les tâches
+void fork_planifier(const char *commande, int delai, int iterations){
+    pid_t pid = fork();
+        if (pid == -1)
+        {
+            // Erreur lors de la création du processus fils
+            perror("Erreur lors de la création du processus fils");
+            exit(EXIT_FAILURE);
+        }
+        else if (pid == 0)
+        {
+            // Processus fils : exécute la commande
+            planifier_taches(commande, delai, iterations);
+            exit(EXIT_SUCCESS); // Quitte le processus fils après l'exécution de la commande
+        }
 }
 
 // Fonction pour récuperer les informations donner par l'uttlisateur et lancer le planificateur en fonction d'elle.
@@ -157,14 +175,14 @@ int main(int argc, char *argv[])
         if (difference < 0)
         {
             printf("Date spécifiée antérieure à la date actuelle. Exécution immédiate de la commande.\n");
-            planifier_taches(commande, delai, iterations);
-            return 0;
+            fork_planifier(commande, delai, iterations); 
+            exit(EXIT_SUCCESS);
         }
         else if (difference == 0)
         {
             printf("Date spécifiée identique à la date actuelle. Exécution immédiate de la commande.\n");
-            planifier_taches(commande, delai, iterations);
-            return 0;
+            fork_planifier(commande, delai, iterations); 
+            exit(EXIT_SUCCESS);
         }
         else
         {
@@ -173,12 +191,12 @@ int main(int argc, char *argv[])
             sleep(difference);
 
             // Exécution de la commande après l'attente
-            planifier_taches(commande, delai, iterations);
+            fork_planifier(commande, delai, iterations); 
         }
     }
     else // Si aucune date spécifiée, exécute immédiatement la commande
-    {
-        planifier_taches(commande, delai, iterations);
+    {   
+        fork_planifier(commande, delai, iterations); 
     }
 
     return 0;
