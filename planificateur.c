@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
     // Vérifie le nombre d'arguments
     if (argc != 4 && argc != 5)
     {
-        fprintf(stderr, "\nUtilisation du planificateur: %s <iterations> <delai> <\"commande\"> <date (facultatif)>\n\nOptions :\ninfini : <itération> = i \ndate : <date> = JJ/MM/AAAA-HH:MM\n\nStop : Ctrl+C\n", argv[0]);
+        fprintf(stderr, "\nUtilisation du planificateur: %s <iterations> <delai> <\"commande\"> <date (facultatif)>\n\nOptions :\ninfini : <itération> = i \ndate : <date> = JJ/MM/AAAA-HH:MM\n\nStop : Ctrl+C (sauf pour infini)\n", argv[0]);
         return 1;
     }
 

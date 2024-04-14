@@ -8,10 +8,10 @@ On obtiens la notice :
 Utilisation du planificateur: ./planificateur <iterations> <delai (seconde)> <"commande"> <date (facultatif)>
 
 Options :
-infini : <itération> = i (Ctrl+C pour arreter)
+infini : <itération> = i
 date : <date> = JJ/MM/AAAA-HH:MM
 
-Pour arreter le plannificateur de taches : Ctrl+C
+Pour arreter le plannificateur de taches : Ctrl+C (sauf pour infini : kill le terminal)
 
 o Cas d’utilisation :
 
