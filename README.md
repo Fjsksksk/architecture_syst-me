@@ -11,6 +11,8 @@ Options :
 infini : <itération> = i (Ctrl+C pour arreter)
 date : <date> = JJ/MM/AAAA-HH:MM
 
+Pour arreter le plannificateur de taches : Ctrl+C
+
 o Cas d’utilisation :
 
 normal = ./planificateur 2 5 "ls"
